@@ -28,11 +28,6 @@ const dbDatabase = process.env.DB_DATABASE;
 
 const pool = new Pool(
   {
-    //host name
-    //user
-    //password
-    //name of db
-    //port - 5432
     user: dbUser,
     password: dbPassword,
     host: "localhost",
@@ -76,22 +71,29 @@ function init() {
         });
         break;
       case "view all roles":
-        pool.query("SELECT * FROM role", (error, results) => {
-          if (error) {
-            console.error("Error executing query", error);
-            return;
+        pool.query(
+          "SELECT role.id AS role_id, role.title AS job_title, role.salary, department.name AS department_name FROM role JOIN department ON role.department_id = department.id;",
+          (error, results) => {
+            if (error) {
+              console.error("Error executing query", error);
+              return;
+            }
+            console.table(results.rows);
           }
-          console.table(results.rows);
-        });
+        );
         break;
+
       case "view all employees":
-        pool.query("SELECT * FROM employee", (error, results) => {
-          if (error) {
-            console.error("Error executing query", error);
-            return;
+        pool.query(
+          "SELECT e.id AS employee_id, e.first_name, e.last_name, r.title AS job_title, department.name AS department_name, r.salary, CONCAT(e.first_name, '', e.last_name) AS manager_name FROM employee e JOIN role r ON e.role_id = r.id JOIN department ON r.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id",
+          (error, results) => {
+            if (error) {
+              console.error("Error executing query", error);
+              return;
+            }
+            console.table(results.rows);
           }
-          console.table(results.rows);
-        });
+        );
         break;
       case "add a department":
         inquirer
@@ -141,7 +143,7 @@ function init() {
             const { roleTitle, salary, department_id } = answer;
 
             pool.query(
-              `INSERT INTO roles (title, salary, department_id) VALUES ($1, $2, $3)`,
+              `INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)`,
               [roleTitle, salary, department_id],
               (error, results) => {
                 if (error) {
@@ -181,7 +183,7 @@ function init() {
             const { first_name, last_name, role_id, manager_id } = answer;
 
             pool.query(
-              `INSERT INTO roles (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`,
+              `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`,
               [first_name, last_name, role_id, manager_id],
               (error, results) => {
                 if (error) {
@@ -193,6 +195,7 @@ function init() {
             );
           });
         break;
+
       case "update an employee role":
         //update - SQL quirey
         break;
