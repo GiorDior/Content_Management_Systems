@@ -198,6 +198,36 @@ function init() {
 
       case "update an employee role":
         //update - SQL quirey
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "first_name",
+              message: "Enter the first name of the employee: ",
+            },
+            {
+              type: "input",
+              name: "newRole_id",
+              message: "Enter the new role id: ",
+            },
+          ])
+          .then((answers) => {
+            const { first_name, newRole_id } = answers;
+            console.log(
+              "----------------------------------------------------------------------"
+            );
+            console.log(answers);
+            pool.query(
+              `UPDATE employee SET role_id = $1 WHERE first_name = $2`,
+              [newRole_id, first_name],
+              (error, results) => {
+                if (error) {
+                  console.error("Error executing query", error);
+                  return;
+                }
+              }
+            );
+          });
         break;
     }
   });
